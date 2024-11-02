@@ -1,75 +1,178 @@
+/* App.css */
+:root {
+  --primary-color: #4e54c8;
+  --primary-hover: #3a40a0;
+  --danger-color: #dc3545;
+  --danger-hover: #c82333;
+  --secondary-color: #6c757d;
+  --secondary-hover: #5a6268;
+  --background-gradient: linear-gradient(135deg, #4e54c8, #8b4ad3, #da4c9f);
+}
+
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
   margin: 0;
-  padding: 20px;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+  background: var(--background-gradient);
+  min-height: 100vh;
+  color: white;
 }
 
-h1, h2 {
-  color: #333;
+.App {
+  min-height: 100vh;
+  padding: 40px 20px;
 }
 
-textarea {
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+h2 {
+  font-size: 2em;
+  margin-top: 40px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+h3 {
+  font-size: 1.2em;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.input-section {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 25px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 30px;
+}
+
+.note-input {
   width: 100%;
-  height: 100px;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box; /* 입력란 크기가 너비에 포함되도록 */
+  height: 120px;
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.note-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 10px rgba(78, 84, 200, 0.3);
+}
+
+.button-group {
+  display: flex;
+  gap: 15px;
 }
 
 button {
-  background-color: #5c6bc0;
-  color: white;
+  font-size: 16px;
+  padding: 12px 24px;
+  border-radius: 8px;
   border: none;
-  padding: 10px 20px;
-  margin-right: 10px;
-  border-radius: 4px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
 }
 
-button:hover {
-  background-color: #3f51b5;
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
-#notes {
-  background-color: white;
-  border-radius: 4px;
-  padding: 10px;
-  margin-top: 20px;
+.primary-button {
+  background: #ffffff;
+  color: var(--primary-color);
+}
+
+.primary-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.secondary-button {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--secondary-color);
+}
+
+.danger-button {
+  background: rgba(220, 53, 69, 0.9);
+  color: white;
+}
+
+.danger-button:hover {
+  background: var(--danger-hover);
+}
+
+.notes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .note {
-  padding: 10px;
-  margin-bottom: 10px;
-  background-color: #eee;
-  border-radius: 4px;
-}
-.note-container {
-display: flex;
-align-items: center;
-margin-bottom: 20px; /* 메모들 사이의 상하 간격 조정 */
-}
-
-.note-container button {
-  margin-right: 10px;
-}
-
-.note {
-  margin-bottom: 15px; /* 각 노트 사이의 간격 */
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .note-content, .ai-note {
-  margin-bottom: 10px; /* 내용과 버튼 사이의 간격 */
+  margin-bottom: 15px;
+}
+
+.note-content p, .ai-note p {
+  margin: 10px 0;
+  font-size: 16px;
 }
 
 .note-actions {
   display: flex;
-  align-items: center;
-  justify-content: flex-start; /* 버튼을 왼쪽 정렬 */
+  gap: 10px;
+  margin-top: 20px;
 }
 
-.note-actions button {
-  margin-right: 10px; /* 버튼 사이의 간격 */
+.no-notes {
+  text-align: center;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 480px) {
+  .App {
+    padding: 20px 10px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .note {
+    padding: 15px;
+  }
 }

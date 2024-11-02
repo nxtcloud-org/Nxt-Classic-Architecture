@@ -1,103 +1,149 @@
+// App.js
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
-const server_url = "서버IP를 입력하세요";
+const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
 function App() {
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // 페이지 로드 시 데이터를 불러옵니다.
     fetchNotes();
-
-    // 10초마다 페이지 새로고침 타이머 설정
-    const interval = setInterval(() => {
-      fetchNotes();
-    }, 10000); // 10초 = 10000밀리초
-
-    // 컴포넌트가 언마운트될 때 타이머를 정리합니다.
+    const interval = setInterval(fetchNotes, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  const fetchNotes = () => {
-    fetch(`${server_url}/notes`)
-      .then((response) => response.json())
-      .then((data) => setNotes(data));
+  const fetchNotes = async () => {
+    try {
+      const response = await fetch(`${SERVER_URL}/notes`);
+      const data = await response.json();
+      setNotes(data);
+    } catch (error) {
+      console.error("노트 조회 중 오류 발생:", error);
+    }
   };
 
-  const addNote = () => {
-    fetch(`${server_url}/notes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: newNote }),
-    }).then(() => {
-      fetchNotes();
-      setNewNote("");
-    });
-  };
-
-  const deleteNote = (id) => {
-    fetch(`${server_url}/notes/${id}`, { method: "DELETE" }).then(() =>
-      fetchNotes()
-    );
-  };
-
-  const deleteNotes = () => {
-    fetch(`${server_url}/notes`, { method: "DELETE" }).then(() => fetchNotes());
-  };
-
-  const requestAIAdvice = (userNote) => {
-    fetch(`${server_url}/ainotes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: userNote }),
-    })
-      .then(() => {
-        fetchNotes();
-      })
-      .catch((error) => {
-        console.error("Error:", error);
+  const addNote = async () => {
+    if (!newNote.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      await fetch(`${SERVER_URL}/notes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: newNote }),
       });
+      await fetchNotes();
+      setNewNote("");
+    } catch (error) {
+      console.error("노트 추가 중 오류 발생:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteNote = async (id) => {
+    try {
+      await fetch(`${SERVER_URL}/notes/${id}`, { method: "DELETE" });
+      await fetchNotes();
+    } catch (error) {
+      console.error("노트 삭제 중 오류 발생:", error);
+    }
+  };
+
+  const deleteNotes = async () => {
+    if (!window.confirm("모든 기록을 삭제하시겠습니까?")) return;
+    
+    try {
+      await fetch(`${SERVER_URL}/notes`, { method: "DELETE" });
+      await fetchNotes();
+    } catch (error) {
+      console.error("전체 노트 삭제 중 오류 발생:", error);
+    }
+  };
+
+  const requestAIAdvice = async (userNote) => {
+    try {
+      await fetch(`${SERVER_URL}/ainotes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: userNote }),
+      });
+      await fetchNotes();
+    } catch (error) {
+      console.error("AI 조언 요청 중 오류 발생:", error);
+    }
   };
 
   return (
     <div className="App">
-      <h1>학습 기록 애플리케이션</h1>
-      <h3>오늘 학습한 내용을 기록해보세요.</h3>
-      <textarea
-        value={newNote}
-        onChange={(e) => setNewNote(e.target.value)}
-        placeholder="무엇을 공부하셨나요?"
-      />
-      <br />
-      <button onClick={addNote}>학습 기록 추가</button>
-      <button onClick={deleteNotes}>전체 기록 삭제</button>
-
-      <h2>내 학습 기록</h2>
-      <div>
-        {notes.map((note) => (
-          <div key={note.id} className="note">
-            <div className="note-content">
-              <strong>사용자 메모:</strong> {note.user_note}
-            </div>
-            {note.ai_note ? (
-              <div className="ai-note">
-                <strong>AI 추천 학습 내용:</strong> {note.ai_note}
-              </div>
-            ) : null}
-            <div className="note-actions">
-              {!note.ai_note && (
-                <button
-                  onClick={() => requestAIAdvice(note.user_note, note.id)}
-                >
-                  AI 조언 요청
-                </button>
-              )}
-              <button onClick={() => deleteNote(note.id)}>삭제</button>
-            </div>
+      <div className="container">
+        <h1>학습 기록 애플리케이션</h1>
+        <h3>오늘 학습한 내용을 기록해보세요.</h3>
+        
+        <div className="input-section">
+          <textarea
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder="무엇을 공부하셨나요?"
+            className="note-input"
+          />
+          <div className="button-group">
+            <button 
+              onClick={addNote} 
+              disabled={isLoading || !newNote.trim()}
+              className="primary-button"
+            >
+              {isLoading ? "추가 중..." : "학습 기록 추가"}
+            </button>
+            <button 
+              onClick={deleteNotes}
+              className="danger-button"
+            >
+              전체 기록 삭제
+            </button>
           </div>
-        ))}
+        </div>
+
+        <h2>내 학습 기록</h2>
+        <div className="notes-container">
+          {notes.length === 0 ? (
+            <p className="no-notes">아직 기록된 학습 내용이 없습니다.</p>
+          ) : (
+            notes.map((note) => (
+              <div key={note.id} className="note">
+                <div className="note-content">
+                  <strong>📝 학습 내용:</strong> 
+                  <p>{note.user_note}</p>
+                </div>
+                {note.ai_note && (
+                  <div className="ai-note">
+                    <strong>🤖 AI 추천 학습:</strong>
+                    <p>{note.ai_note}</p>
+                  </div>
+                )}
+                <div className="note-actions">
+                  {!note.ai_note && (
+                    <button
+                      onClick={() => requestAIAdvice(note.user_note)}
+                      className="secondary-button"
+                    >
+                      AI 조언 요청
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => deleteNote(note.id)}
+                    className="danger-button"
+                  >
+                    삭제
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
