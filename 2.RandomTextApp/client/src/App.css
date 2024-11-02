@@ -1,0 +1,130 @@
+.App {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #4e54c8, #8b4ad3, #da4c9f);
+    color: white;
+    position: relative;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+h1 {
+    font-size: 3em;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+h2 {
+    font-size: 1.8em;
+    margin: 20px 0;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+    max-width: 800px;
+    text-align: center;
+    line-height: 1.4;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 20px;
+}
+
+input[type="text"] {
+    font-size: 16px;
+    padding: 15px 30px;  /* 버튼과 동일한 패딩 적용 */
+    margin-bottom: 20px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.9);
+    width: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;  /* 패딩을 너비에 포함 */
+}
+
+input[type="text"]:focus {
+    border-color: #4e54c8;
+    box-shadow: 0 4px 20px rgba(78, 84, 200, 0.2);
+    outline: none;
+    transform: translateY(-2px);
+}
+
+button[type="submit"] {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 15px 30px;
+    background: #ffffff;
+    color: #4e54c8;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+    box-sizing: border-box;  /* 패딩을 너비에 포함 */
+}
+
+button[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #4e54c8, #da4c9f);
+    z-index: -1;
+    border-radius: 12px;
+}
+
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    background: #f0f0f0;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    color: #3a40a0;
+}
+
+button[type="submit"]:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 480px) {
+    .App {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    h2 {
+        font-size: 1.4em;
+    }
+    
+    form {
+        width: 90%;
+        padding: 20px;
+    }
+}

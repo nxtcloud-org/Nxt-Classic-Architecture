@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS S3 정적 웹사이트 호스팅 튜토리얼</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AWS S3를 사용하여 정적 웹사이트 호스팅하기</h1>
+        <p>AWS S3를 사용하여 정적 웹사이트를 호스팅하는 방법을 따라해 보세요:</p>
+        
+        <h2>1단계: S3 버킷 생성</h2>
+        <p>
+            AWS 관리 콘솔로 이동하여 S3로 이동합니다. "버킷 만들기"를 클릭하고 새 S3 버킷을 생성하는 지침을 따릅니다. 버킷 이름이 전 세계적으로 고유해야 합니다.
+        </p>
+        
+        <h2>2단계: 정적 웹사이트 호스팅 활성화</h2>
+        <p>
+            버킷을 생성한 후 버킷 이름을 클릭하여 설정을 엽니다. "속성" 탭으로 이동하여 "정적 웹사이트 호스팅"을 활성화합니다. 인덱스 문서로 "index.html"을 지정합니다.
+        </p>
+
+        <h2>3단계: 퍼블릭 차단 해제</h2>
+        <p>
+            "퍼블릭 액세스 차단" 설정이 비활성화되어 있는지 확인하세요. 이 설정은 "권한" 탭에서 찾을 수 있습니다.
+        </p>
+        
+        <h2>4단계: 버킷 정책 업데이트</h2>
+        <p>
+            웹사이트에 대한 공개 액세스를 허용하려면 버킷 정책을 업데이트해야 합니다. "권한" 탭으로 이동하여 "버킷 정책"을 클릭합니다. 다음 정책을 사용하여 공개 읽기 액세스를 허용합니다:
+        </p>
+        <pre>
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::your-bucket-name/*"
+        }
+    ]
+}
+        </pre>
+        <p><code>your-bucket-name</code>을 S3 버킷 이름으로 바꾸세요.</p>
+        
+        <h2>5단계: index.html 파일 업로드</h2>
+        <p>
+            <code>index.html</code> 파일을 S3 버킷의 루트에 업로드합니다. S3 콘솔에서 "업로드" 버튼을 사용하여 업로드할 수 있습니다.
+        </p>
+
+        <h2>6단계: 웹사이트 접근</h2>
+        <p>
+            파일을 업로드하고 설정을 구성한 후에는 "속성" 탭의 "정적 웹사이트 호스팅" 섹션에서 제공된 엔드포인트를 사용하여 정적 웹사이트에 접근할 수 있습니다.
+        </p>
+        
+        <h3>축하합니다!</h3>
+        <p>이제 정적 웹사이트가 라이브 상태가 되었습니다. URL을 다른 사람과 공유하고 호스팅된 콘텐츠를 확인할 수 있습니다.</p>
+    </div>
+</body>
+</html>
