@@ -8,7 +8,7 @@ function App() {
   const [displayedAuthor, setDisplayedAuthor] = useState('');
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_EC2_IP}/api/text`)
+    fetch(`${process.env.REACT_APP_SERVER_URL}/api/text`)
       .then(res => res.json())
       .then(data => {
         let text = data.text.split("by")[0]
@@ -20,7 +20,7 @@ function App() {
 
   const handleSubmit = e => {
     e.preventDefault();
-    fetch(`${process.env.REACT_APP_EC2_IP}/api/text`, {
+    fetch(`${process.env.REACT_APP_SERVER_URL}/api/text`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, username }),
