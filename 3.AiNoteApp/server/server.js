@@ -138,9 +138,9 @@ app.post("/notes", checkDbConnection, checkOpenAIConfig, async (req, res) => {
     try {
         const completion = await openai.chat.completions.create({
             messages: [
-                {
-                    role: "system",
-                    content: "Your are expert in AWS, Tell me one AWS service names that I can learn additionally based on the data sent by the user. in Korean"
+                { 
+                    role: "system", 
+                    content: "You are an expert in AWS. Based on the data provided by the user, suggest one AWS service that the user can additionally learn. Ensure the response is at least three sentences long and in Korean." 
                 },
                 { role: "user", content: userMessage }
             ],
