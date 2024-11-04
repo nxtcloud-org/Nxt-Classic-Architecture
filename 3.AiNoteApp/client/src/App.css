@@ -1,12 +1,11 @@
-/* App.css */
 :root {
-  --primary-color: #4e54c8;
-  --primary-hover: #3a40a0;
-  --danger-color: #dc3545;
-  --danger-hover: #c82333;
-  --secondary-color: #6c757d;
-  --secondary-hover: #5a6268;
-  --background-gradient: linear-gradient(135deg, #4e54c8, #8b4ad3, #da4c9f);
+  --primary-color: #6a72e0; /* 기존 #4e54c8 보다 밝게 */
+  --primary-hover: #565ab0; /* 기존 #3a40a0 보다 밝게 */
+  --danger-color: #e56b7a; /* 기존 #dc3545 보다 밝게 */
+  --danger-hover: #d85564; /* 기존 #c82333 보다 밝게 */
+  --secondary-color: #a4acb4; /* 기존 #6c757d 보다 밝게 */
+  --secondary-hover: #8c959d; /* 기존 #5a6268 보다 밝게 */
+  --background-gradient: linear-gradient(135deg, #6a72e0, #a56ae3, #e075b0); /* 기존보다 전체적으로 밝은 그라데이션 */
 }
 
 body {
