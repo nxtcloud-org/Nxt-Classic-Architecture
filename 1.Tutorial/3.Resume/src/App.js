@@ -1,10 +1,7 @@
-// src/App.js
 import { useState, useEffect } from 'react';
 import { 
   LineChart, 
   Line, 
-  BarChart, 
-  Bar, 
   PieChart, 
   Pie, 
   Cell,
@@ -15,7 +12,8 @@ import {
   Legend, 
   ResponsiveContainer 
 } from 'recharts';
-import { Mail, Phone, Github, Linkedin, Moon, Sun, Book, ode, Award, ThumbsUp, Users, ChevronDown,ChevronUp } from 'lucide-react';
+import { Mail, Phone, Github, Linkedin, Moon, Sun, Book, Code, Award, ThumbsUp, Users, ChevronDown, ChevronUp } from 'lucide-react';
+
 
 const experienceData = [
   { 
@@ -60,17 +58,24 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 const LAMBDA_URL = ''; // Lambda 함수의 URL
 
 export default function InteractiveResume() {
- const [darkMode, setDarkMode] = useState(false);
- const [activeChart, setActiveChart] = useState('experience');
- const [visitCount, setVisitCount] = useState(0);
- const [likeCount, setLikeCount] = useState(0);
- const [expandedSection, setExpandedSection] = useState(null);  // 추가
+  const [darkMode, setDarkMode] = useState(false);
+  const [activeChart, setActiveChart] = useState('experience');
+  const [visitCount, setVisitCount] = useState(0);
+  const [likeCount, setLikeCount] = useState(0);
+  const [expandedSections, setExpandedSections] = useState(new Set());  // Set으로 변경
 
- // toggleSection 함수 추가
- const toggleSection = (section) => {
-   setExpandedSection(expandedSection === section ? null : section);
- };
-
+  // toggleSection 함수 수정
+  const toggleSection = (section) => {
+    setExpandedSections(prev => {
+      const newSections = new Set(prev);
+      if (newSections.has(section)) {
+        newSections.delete(section);
+      } else {
+        newSections.add(section);
+      }
+      return newSections;
+    });
+  };
  useEffect(() => {
    // 방문 카운트 GET
    fetch(`${LAMBDA_URL}/visit`)
@@ -331,13 +336,13 @@ export default function InteractiveResume() {
                     {edu.description}
                   </p>
                 </div>
-                {expandedSection === `edu-${index}` ? (
+                {expandedSections.has(`edu-${index}`) ? (
                   <ChevronUp className="w-6 h-6" />
                 ) : (
                   <ChevronDown className="w-6 h-6" />
                 )}
               </div>
-              {expandedSection === `edu-${index}` && (
+              {expandedSections.has(`edu-${index}`) && (
                 <ul className={`list-disc list-inside mt-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                   {edu.achievements.map((achievement, i) => (
                     <li key={i} className="mt-2">
@@ -350,73 +355,75 @@ export default function InteractiveResume() {
           ))}
         </div>
       </section>
-       <div className={`p-6 rounded-lg ${cardBgColor} mb-8`}>
-         <div className="flex gap-4 mb-4">
-           <button
-             onClick={() => setActiveChart('experience')}
-             className={`px-4 py-2 rounded ${activeChart === 'experience' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
-           >
-             Experience
-           </button>
-         </div>
-         {activeChart === 'experience' && renderExperienceChart()}
-       </div>
 
-       <section className="mb-8">
-          <h3 className="text-2xl font-semibold mb-4">Projects</h3>
-          <div className="space-y-4">
-            {[
-              {
-                title: '학과 스터디 매칭 플랫폼 AWS 배포',
-                achievements: [
-                  'AWS EC2에 Node.js 백엔드 서버 배포 및 RDS(MySQL) 연동',
-                  'Terraform IaC를 활용한 AWS 리소스 자동화',
-                  'DevOps/인프라 담당'
-                ],
-              },
-              {
-                title: '교내 동아리 웹사이트 클라우드 전환',
-                achievements: [
-                  'AWS S3와 CloudFront를 활용한 정적 웹사이트 호스팅',
-                  'Route53을 통한 도메인 관리 및 HTTPS 설정',
-                  'Lambda를 활용한 이미지 리사이징 자동화 구현',
-                  'CloudWatch로 접속자 수 모니터링 대시보드 구축'
-                ],
-              },
-              {
-                title: '개인 블로그 운영',
-                achievements: [
-                  '프로젝트 진행 과정 블로그 연재 중',
-                  'SAA 문제 풀이 블로그 연재 중'
-                ],
-              }
-            ].map((project, index) => (
-              <div key={index} className={`p-4 rounded-lg ${cardBgColor} shadow-lg transition-all duration-300`}>
-                <div
-                  className="flex justify-between items-center cursor-pointer"
-                  onClick={() => toggleSection(`project-${index}`)}
-                >
-                  <h4 className="text-xl font-semibold">{project.title}</h4>
-                  {expandedSection === `project-${index}` ? (
-                    <ChevronUp className="w-6 h-6" />
-                  ) : (
-                    <ChevronDown className="w-6 h-6" />
-                  )}
-                </div>
-                {expandedSection === `project-${index}` && (
-                  <ul className={`list-disc list-inside mt-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    {project.achievements.map((achievement, i) => (
-                      <li key={i} className="mt-2">
-                        {achievement}
-                      </li>
-                    ))}
-                  </ul>
+      <div className={`p-6 rounded-lg ${cardBgColor} mb-8`}>
+        <div className="flex gap-4 mb-4">
+          <button
+            onClick={() => setActiveChart('experience')}
+            className={`px-4 py-2 rounded ${activeChart === 'experience' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}
+          >
+            Experience
+          </button>
+        </div>
+        {activeChart === 'experience' && renderExperienceChart()}
+      </div>
+
+      <section className="mb-8">
+        <h3 className="text-2xl font-semibold mb-4">Projects</h3>
+        <div className="space-y-4">
+          {[
+            {
+              title: '학과 스터디 매칭 플랫폼 AWS 배포',
+              achievements: [
+                'AWS EC2에 Node.js 백엔드 서버 배포 및 RDS(MySQL) 연동',
+                'Terraform IaC를 활용한 AWS 리소스 자동화',
+                'DevOps/인프라 담당'
+              ],
+            },
+            {
+              title: '교내 동아리 웹사이트 클라우드 전환',
+              achievements: [
+                'AWS S3와 CloudFront를 활용한 정적 웹사이트 호스팅',
+                'Route53을 통한 도메인 관리 및 HTTPS 설정',
+                'Lambda를 활용한 이미지 리사이징 자동화 구현',
+                'CloudWatch로 접속자 수 모니터링 대시보드 구축'
+              ],
+            },
+            {
+              title: '개인 블로그 운영',
+              achievements: [
+                '프로젝트 진행 과정 블로그 연재 중',
+                'SAA 문제 풀이 블로그 연재 중'
+              ],
+            }
+          ].map((project, index) => (
+            <div key={index} className={`p-4 rounded-lg ${cardBgColor} shadow-lg transition-all duration-300`}>
+              <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => toggleSection(`project-${index}`)}
+              >
+                <h4 className="text-xl font-semibold">{project.title}</h4>
+                {expandedSections.has(`project-${index}`) ? (
+                  <ChevronUp className="w-6 h-6" />
+                ) : (
+                  <ChevronDown className="w-6 h-6" />
                 )}
               </div>
-            ))}
-          </div>
-        </section>
-        <section className="mb-8">
+              {expandedSections.has(`project-${index}`) && (
+                <ul className={`list-disc list-inside mt-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {project.achievements.map((achievement, i) => (
+                    <li key={i} className="mt-2">
+                      {achievement}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mb-8">
         <h3 className="text-2xl font-semibold mb-4">Skills</h3>
         <div className="flex flex-wrap gap-2">
           {[
@@ -436,7 +443,7 @@ export default function InteractiveResume() {
           ))}
         </div>
       </section>
-     </div>
-   </div>
- );
+    </div>
+  </div>
+  )
 }
