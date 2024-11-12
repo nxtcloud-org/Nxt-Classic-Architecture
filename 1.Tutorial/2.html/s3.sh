@@ -2,14 +2,17 @@
 
 # 변수 설정
 BUCKET_NAME="AAA-000-s3"
-REGION="ap-northeast-2"
+REGION="us-east-1"
 
 # 대상 파일 이름
 INDEX_FILE="index.html"
 
 # S3 버킷 생성
 echo "S3 bucket 생성 중...\n\n"
-aws s3api create-bucket --bucket $BUCKET_NAME --region $REGION --create-bucket-configuration LocationConstraint=$REGION
+aws s3api create-bucket --bucket $BUCKET_NAME --region $REGION
+
+#us-east-1 외에는 --create-bucket-configuration 사용
+# aws s3api create-bucket --bucket $BUCKET_NAME --region $REGION --create-bucket-configuration LocationConstraint=$REGION
 
 # 정적 웹사이트 호스팅 활성화
 echo "정적 웹사이트 호스팅 활성화 중...\n\n"
