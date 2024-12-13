@@ -12,7 +12,7 @@ import {
   Legend, 
   ResponsiveContainer 
 } from 'recharts';
-import { Mail, Phone, Github, Linkedin, Moon, Sun, Book, Code, Award, ThumbsUp, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail, Phone, Github, Linkedin, Moon, Sun, Award, ThumbsUp, Users, ChevronDown, ChevronUp } from 'lucide-react';
 
 
 const experienceData = [
