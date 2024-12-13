@@ -33,6 +33,12 @@ with col2:
         else:
             st.error("❌ 모든 필드를 입력해 주세요!")
 
+st.write("---")
+# 장난 버튼
+if st.button("👈 왼쪽을 보시오", type="primary"):
+    # 토스트 메시지
+    st.toast("여기가 왼쪽이냐? 👀", icon="🤔")
+
 # 추가 정보 (하단 박스에 배치)
 st.write("---")
 st.info(
