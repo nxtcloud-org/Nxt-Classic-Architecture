@@ -66,6 +66,7 @@ const createNotesTable = (connection) => {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_note TEXT NOT NULL,
                 ai_note TEXT,
+                ai_type ENUM('gpt', 'claude') DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
@@ -94,60 +95,51 @@ const checkDbConnection = (req, res, next) => {
     next();
 };
 
-// Lambda 호출 함수
-const callLambdaFunction = async (content) => {
-  if (!process.env.LAMBDA_URL) {
-      throw new Error('Lambda URL이 설정되지 않았습니다');
+// GPT Lambda 호출 함수
+const callGPTLambda = async (content, noteId) => {
+  if (!process.env.GPT_LAMBDA_URL) {
+      throw new Error('GPT Lambda URL이 설정되지 않았습니다');
   }
 
   try {
-      const response = await axios.post(process.env.LAMBDA_URL, { content });
+      const response = await axios.post(process.env.GPT_LAMBDA_URL, { 
+          content,
+          noteId 
+      });
       return response.data;
   } catch (error) {
-      console.error('Lambda 호출 중 오류:', error);
-      throw new Error('AI 서비스 호출 실패');
+      console.error('GPT Lambda 호출 중 오류:', error);
+      throw new Error('GPT 서비스 호출 실패');
   }
 };
 
+// Claude Lambda 호출 함수
+const callClaudeLambda = async (content, noteId) => {
+  if (!process.env.BEDROCK_LAMBDA_URL) {
+      throw new Error('Bedrock Lambda URL이 설정되지 않았습니다');
+  }
+
+  try {
+      const response = await axios.post(process.env.BEDROCK_LAMBDA_URL, { 
+          content,
+          noteId 
+      });
+      return response.data;
+  } catch (error) {
+      console.error('Claude Lambda 호출 중 오류:', error);
+      throw new Error('Claude 서비스 호출 실패');
+  }
+};
 // 기본 경로
 app.get("/", (req, res) => {
     res.json({ 
         message: "서버 실행 중",
         status: {
             database: dbConnection ? "연결됨" : "연결 안됨",
-            lambda_url: process.env.LAMBDA_URL ? "설정됨" : "설정 안됨"
+            gpt_lambda_url: process.env.GPT_LAMBDA_URL ? "설정됨" : "설정 안됨",
+            claude_lambda_url: process.env.BEDROCK_LAMBDA_URL ? "설정됨" : "설정 안됨"
         }
     });
-});
-
-// AI 조언 요청 처리
-app.post("/ainotes", checkDbConnection, async (req, res) => {
-  const { content } = req.body;
-
-  if (!content?.trim()) {
-      return res.status(400).json({ error: "내용을 입력해주세요" });
-  }
-
-  if (!process.env.LAMBDA_URL) {
-      return res.status(503).json({ 
-          error: "AI 서비스 사용 불가",
-          message: "현재 AI 서비스를 사용할 수 없습니다. Lambda URL 설정을 확인해주세요."
-      });
-  }
-
-  try {
-      console.log('Lambda 함수 호출 중...');
-      await callLambdaFunction(content);
-      console.log('Lambda 함수 호출 완료');
-      
-      res.json({ message: "AI 분석 요청이 처리되었습니다" });
-  } catch (error) {
-      console.error('AI 조언 요청 처리 중 오류:', error);
-      res.status(500).json({ 
-          error: "AI 서비스 처리 실패",
-          message: "잠시 후 다시 시도해주세요"
-      });
-  }
 });
 
 // 메모 추가
@@ -211,7 +203,7 @@ app.delete("/notes", checkDbConnection, async (req, res) => {
 
     dbConnection.query(sql, (err, result) => {
         if (err) {
-            console.error('전체 메모 삭제 중 오류:', err);
+            console.error('전체 메모 삭제 중 오류:', error);
             return res.status(500).json({ error: "전체 메모 삭제 실패" });
         }
 
@@ -222,26 +214,83 @@ app.delete("/notes", checkDbConnection, async (req, res) => {
     });
 });
 
-// 서버 시작
-const startServer = async () => {
-  try {
-      await connectToDatabase();
-      
-      app.listen(port, () => {
-          console.log('\n=== 서버 상태 ===');
-          console.log(`포트: ${port}`);
-          // console.log(`데이터베이스 연결: ${dbConnection ? '성공 ✅' : '실패 ❌'}`);
-          console.log(`Lambda URL: ${process.env.LAMBDA_URL ? '설정됨 ✅' : '설정 안됨 ⚠️'}`);
-          if (!process.env.LAMBDA_URL) {
-              console.log('※ Lambda URL이 설정되지 않아 AI 기능은 사용할 수 없습니다.');
-          }
-          console.log('=================\n');
-      });
-  } catch (error) {
-      console.error('서버 시작 실패:', error);
-      process.exit(1);
-  }
-};
+// GPT 조언 요청 처리
+app.post("/gpt-notes", checkDbConnection, async (req, res) => {
+    const { content, noteId } = req.body;
+
+    if (!content?.trim() || !noteId) {
+        return res.status(400).json({ error: "내용과 노트 ID가 필요합니다" });
+    }
+
+    if (!process.env.GPT_LAMBDA_URL) {
+        return res.status(503).json({ 
+            error: "GPT 서비스 사용 불가",
+            message: "현재 GPT 서비스를 사용할 수 없습니다. Lambda URL 설정을 확인해주세요."
+        });
+    }
+
+    try {
+        console.log('GPT Lambda 함수 호출 중...');
+        const aiResponse = await callGPTLambda(content, noteId);
+        console.log('GPT Lambda 함수 호출 완료');
+
+        // DB에 AI 응답 저장
+        const updateSql = "UPDATE notes SET ai_note = ?, ai_type = 'gpt' WHERE id = ?";
+        dbConnection.query(updateSql, [aiResponse, noteId], (err, result) => {
+            if (err) {
+                console.error('AI 응답 저장 중 오류:', err);
+                return res.status(500).json({ error: "AI 응답 저장 실패" });
+            }
+            
+            res.json({ message: "GPT 분석 요청이 처리되었습니다" });
+        });
+    } catch (error) {
+        console.error('GPT 조언 요청 처리 중 오류:', error);
+        res.status(500).json({ 
+            error: "GPT 서비스 처리 실패",
+            message: "잠시 후 다시 시도해주세요"
+        });
+    }
+});
+
+// Claude 조언 요청 처리
+app.post("/claude-notes", checkDbConnection, async (req, res) => {
+    const { content, noteId } = req.body;
+
+    if (!content?.trim() || !noteId) {
+        return res.status(400).json({ error: "내용과 노트 ID가 필요합니다" });
+    }
+
+    if (!process.env.BEDROCK_LAMBDA_URL) {
+        return res.status(503).json({ 
+            error: "Claude 서비스 사용 불가",
+            message: "현재 Claude 서비스를 사용할 수 없습니다. Lambda URL 설정을 확인해주세요."
+        });
+    }
+
+    try {
+        console.log('Claude Lambda 함수 호출 중...');
+        const aiResponse = await callClaudeLambda(content, noteId);
+        console.log('Claude Lambda 함수 호출 완료');
+
+        // DB에 AI 응답 저장
+        const updateSql = "UPDATE notes SET ai_note = ?, ai_type = 'claude' WHERE id = ?";
+        dbConnection.query(updateSql, [aiResponse, noteId], (err, result) => {
+            if (err) {
+                console.error('AI 응답 저장 중 오류:', err);
+                return res.status(500).json({ error: "AI 응답 저장 실패" });
+            }
+            
+            res.json({ message: "Claude 분석 요청이 처리되었습니다" });
+        });
+    } catch (error) {
+        console.error('Claude 조언 요청 처리 중 오류:', error);
+        res.status(500).json({ 
+            error: "Claude 서비스 처리 실패",
+            message: "잠시 후 다시 시도해주세요"
+        });
+    }
+});
 
 // 예상치 못한 에러 처리
 process.on('uncaughtException', (error) => {
@@ -253,5 +302,26 @@ process.on('unhandledRejection', (error) => {
     console.error('처리되지 않은 Promise 거부:', error);
     process.exit(1);
 });
+
+// 서버 시작
+const startServer = async () => {
+    try {
+        await connectToDatabase();
+        
+        app.listen(port, () => {
+            console.log('\n=== 서버 상태 ===');
+            console.log(`포트: ${port}`);
+            console.log(`GPT Lambda URL: ${process.env.GPT_LAMBDA_URL ? '설정됨 ✅' : '설정 안됨 ⚠️'}`);
+            console.log(`Claude Lambda URL: ${process.env.BEDROCK_LAMBDA_URL ? '설정됨 ✅' : '설정 안됨 ⚠️'}`);
+            if (!process.env.GPT_LAMBDA_URL || !process.env.BEDROCK_LAMBDA_URL) {
+                console.log('※ Lambda URL이 설정되지 않은 AI 기능은 사용할 수 없습니다.');
+            }
+            console.log('=================\n');
+        });
+    } catch (error) {
+        console.error('서버 시작 실패:', error);
+        process.exit(1);
+    }
+};
 
 startServer();
