@@ -13,12 +13,13 @@ exports.handler = async (event) => {
         return { statusCode: 400, body: 'Invalid JSON format' };
     }
 
-    if (!inputData || !inputData.content) {
-        console.error('Invalid request: No content provided');
-        return { statusCode: 400, body: 'No content provided' };
+    if (!inputData || !inputData.content || !inputData.noteId) {
+        console.error('Invalid request: No content or noteId provided');
+        return { statusCode: 400, body: 'No content or noteId provided' };
     }
     
     const userMessage = inputData.content;
+    const noteId = inputData.noteId;
     console.log("ai한테 보낼 유저 메시지 내용", inputData.content, typeof inputData.content)
     
     try {
@@ -45,8 +46,8 @@ exports.handler = async (event) => {
         const db = mysql.createConnection(dbConfig);
         db.connect();
 
-        const sql = 'UPDATE notes SET ai_note = ? WHERE user_note = ?';
-        const values = [aiResponse, userMessage];
+        const sql = 'UPDATE notes SET ai_note = ?, ai_type = ? WHERE id = ?';
+        const values = [aiResponse, 'gpt', noteId];
         await new Promise((resolve, reject) => {
             db.query(sql, values, (err, result) => {
                 if (err) reject(err);
