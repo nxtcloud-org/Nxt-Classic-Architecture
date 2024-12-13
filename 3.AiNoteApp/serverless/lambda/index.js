@@ -1,5 +1,5 @@
 const OpenAI = require('openai');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 exports.handler = async (event) => {
     console.log("EC2 -> Lambda로 전달된 데이터", event.body)
