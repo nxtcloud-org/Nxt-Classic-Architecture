@@ -21,14 +21,15 @@ def lambda_handler(event, context):
             'body': 'Invalid JSON format'
         }
     
-    if not input_data or 'content' not in input_data:
-        print('Invalid request: No content provided')
+    if not input_data or 'content' not in input_data or 'noteId' not in input_data:
+        print('Invalid request: No content or noteId provided')
         return {
             'statusCode': 400,
-            'body': 'No content provided'
+            'body': 'No content or noteId provided'
         }
     
     user_message = input_data['content']
+    note_id = input_data['noteId']
     print("ai한테 보낼 유저 메시지 내용", input_data['content'], type(input_data['content']))
     
     try:
@@ -55,7 +56,7 @@ def lambda_handler(event, context):
 
         # Bedrock 모델 호출
         response = bedrock.invoke_model(
-            modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',  # 모델 ID 업데이트
+            modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
             body=json.dumps(request_body),
             contentType='application/json',
             accept='application/json'
@@ -77,9 +78,9 @@ def lambda_handler(event, context):
         
         try:
             with db.cursor() as cursor:
-                # AI 응답 저장
-                sql = 'UPDATE notes SET ai_note = %s WHERE user_note = %s'
-                cursor.execute(sql, (ai_response, user_message))
+                # AI 응답 저장 - id 기반으로 수정
+                sql = 'UPDATE notes SET ai_note = %s, ai_type = %s WHERE id = %s'
+                cursor.execute(sql, (ai_response, 'claude', note_id))
                 db.commit()
         finally:
             db.close()
