@@ -5,7 +5,7 @@ function App() {
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [aiRequestInProgress, setAiRequestInProgress] = useState(null);
+  const [aiRequestInProgress, setAiRequestInProgress] = useState({ id: null, type: null });
 
   useEffect(() => {
     fetchNotes();
@@ -71,28 +71,57 @@ function App() {
     }
   };
 
-  const requestAIAdvice = async (userNote, noteId) => {
-    if (aiRequestInProgress) return;
+  const requestGPTAdvice = async (userNote, noteId) => {
+    if (aiRequestInProgress.id) return;
     
-    setAiRequestInProgress(noteId);
+    setAiRequestInProgress({ id: noteId, type: 'gpt' });
     try {
-      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/ainotes`, {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/gpt-notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: userNote }),
+        body: JSON.stringify({ 
+            content: userNote,
+            noteId: noteId 
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('AI 조언 요청 실패');
+        throw new Error('GPT 조언 요청 실패');
       }
 
       await fetchNotes();
     } catch (error) {
-      console.error('AI 조언 요청 중 오류:', error);
+      console.error('GPT 조언 요청 중 오류:', error);
     } finally {
-      setAiRequestInProgress(null);
+      setAiRequestInProgress({ id: null, type: null });
     }
-  };
+};
+
+const requestClaudeAdvice = async (userNote, noteId) => {
+    if (aiRequestInProgress.id) return;
+    
+    setAiRequestInProgress({ id: noteId, type: 'claude' });
+    try {
+      const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/claude-notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            content: userNote,
+            noteId: noteId 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Claude 조언 요청 실패');
+      }
+
+      await fetchNotes();
+    } catch (error) {
+      console.error('Claude 조언 요청 중 오류:', error);
+    } finally {
+      setAiRequestInProgress({ id: null, type: null });
+    }
+};
 
   return (
     <div className="App">
@@ -128,50 +157,67 @@ function App() {
 
         <h2>내 AWS 학습 기록</h2>
         <div className="notes-container">
-          {notes.length === 0 ? (
-            <p className="no-notes">아직 기록된 학습 내용이 없습니다.</p>
-          ) : (
-            // notes.map 부분 수정
-            notes.map(note => (
-              <div key={note.id} className="note">
-                <div className="note-content">
-                  <strong>📝 학습 내용:</strong>
-                  <p>{note.user_note}</p>
+        {notes.length === 0 ? (
+          <p className="no-notes">아직 기록된 학습 내용이 없습니다.</p>
+        ) : (
+          notes.map(note => (
+            <div key={note.id} className="note">
+              <div className="note-content">
+                <strong>📝 학습 내용:</strong>
+                <p>{note.user_note}</p>
+              </div>
+              
+              {note.ai_note ? (
+                <div className="ai-note">
+                  <strong>
+                    🤖 {note.ai_type === 'gpt' ? 'GPT' : 'Claude'}의 추천 학습 서비스:
+                  </strong>
+                  <p>{note.ai_note}</p>
                 </div>
-                
-                {note.ai_note ? (
-                  <div className="ai-note">
-                    <strong>🤖 추천 학습 서비스:</strong>
-                    <p>{note.ai_note}</p>
-                  </div>
-                ) : null}
-                
-                <div className="note-actions">
-                  {!note.ai_note && (
+              ) : null}
+              
+              <div className="note-actions">
+                {!note.ai_note && (
+                  <>
                     <button
                       className="secondary-button"
-                      onClick={() => requestAIAdvice(note.user_note, note.id)}
-                      disabled={aiRequestInProgress === note.id}
+                      onClick={() => requestGPTAdvice(note.user_note, note.id)}
+                      disabled={aiRequestInProgress.id === note.id}
                     >
-                      {aiRequestInProgress === note.id ? (
+                      {aiRequestInProgress.id === note.id && aiRequestInProgress.type === 'gpt' ? (
                         <>
                           <span className="loading-spinner"></span>
-                          AI 분석 중...
+                          GPT 분석 중...
                         </>
                       ) : (
-                        'AWS 학습 추천받기'
+                        'GPT에게 학습 추천받기'
                       )}
                     </button>
-                  )}
-                  <button
-                    className="danger-button"
-                    onClick={() => deleteNote(note.id)}
-                    disabled={aiRequestInProgress === note.id}
-                  >
-                    삭제
-                  </button>
-                </div>
+                    <button
+                      className="secondary-button"
+                      onClick={() => requestClaudeAdvice(note.user_note, note.id)}
+                      disabled={aiRequestInProgress.id === note.id}
+                    >
+                      {aiRequestInProgress.id === note.id && aiRequestInProgress.type === 'claude' ? (
+                        <>
+                          <span className="loading-spinner"></span>
+                          Claude 분석 중...
+                        </>
+                      ) : (
+                        'Claude에게 학습 추천받기'
+                      )}
+                    </button>
+                  </>
+                )}
+                <button
+                  className="danger-button"
+                  onClick={() => deleteNote(note.id)}
+                  disabled={aiRequestInProgress.id === note.id}
+                >
+                  삭제
+                </button>
               </div>
+            </div>
             ))
           )}
         </div>
