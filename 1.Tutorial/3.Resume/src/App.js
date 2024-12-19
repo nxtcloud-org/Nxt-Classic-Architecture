@@ -324,6 +324,24 @@ export default function InteractiveResume() {
                 'Streamlit을 활용해 간단한 프론트엔드를 구축하여 사용자 인터페이스 개발',
               ],
             },
+            {
+              title: 'Resume Challenge',
+              description: 'AWS 핵심 서비스들을 활용한 이력서 웹사이트 배포 실습',
+              achievements: [
+                'HTML/CSS로 작성한 이력서를 S3 버킷에 배포하여 웹 호스팅',
+                'DynamoDB 테이블과 Lambda 함수로 웹사이트 좋아요 기능 추가',
+                '가상 서버 EC2 구동 및 환경 설정 경험'
+              ],
+            },
+            {
+              title: 'Face Authentication App',
+              description: 'Amazon Rekognition으로 만드는 얼굴 인식 인증 시스템',
+              achievements: [
+                'CloudFront 배포를 통한 안전한 웹 애플리케이션 제공',
+                'Rekognition API와 Lambda를 연결해 얼굴 비교 로직 작성',
+                'S3 정적 웹 호스팅으로 얼굴 인증 프론트엔드 구현'
+              ],
+            }
           ].map((edu, index) => (
             <div key={index} className={`p-4 rounded-lg ${cardBgColor} shadow-lg transition-all duration-300`}>
               <div
