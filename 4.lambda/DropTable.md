@@ -1,4 +1,4 @@
-mysql -h DBHOOST -u user_000 -p
+mysql -h DBHOST -u user_000 -p
 
 pw_000
 
