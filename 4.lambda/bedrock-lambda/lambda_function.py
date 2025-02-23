@@ -49,7 +49,7 @@ def lambda_handler(event, context):
 
         # Bedrock 모델 호출
         response = bedrock.invoke_model(
-            modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
+            modelId="anthropic.claude-3-haiku-20240307-v1:0",
             body=json.dumps(request_body),
             contentType="application/json",
             accept="application/json",
