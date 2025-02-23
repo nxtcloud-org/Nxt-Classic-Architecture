@@ -63,7 +63,7 @@ with col2:
                 st.write(f"- **✍️ 자기소개**: {introduction}")
             
             except Exception as e:
-                st.error(f"❌ 오류가 발생했습니다: {str(e)}")
+                st.error(f"❌ AI 기능에 정상적으로 연결되지 않았습니다. {str(e)}")
                 st.write("현재 입력된 정보:")
                 st.write(f"- **🧑‍💻 이름**: {name}")
                 st.write(f"- **📖 전공**: {major}")
