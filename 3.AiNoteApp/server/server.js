@@ -78,7 +78,9 @@ const createNotesTable = (connection) => {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_note TEXT,
                 ai_note TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ai_type ENUM('gpt', 'claude') DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `;
 
