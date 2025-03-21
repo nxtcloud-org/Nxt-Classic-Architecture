@@ -44,7 +44,7 @@ const connectToDatabase = () => {
                 console.log('데이터베이스 연결 성공');
                 
                 try {
-                    await createNotesTable(connection);
+                    // await createNotesTable(connection); 
                     dbConnection = connection;
                     resolve(connection);
                 } catch (error) {
@@ -58,31 +58,31 @@ const connectToDatabase = () => {
     }
 };
 
-// notes 테이블 생성 함수
-const createNotesTable = (connection) => {
-    return new Promise((resolve, reject) => {
-        const createTableQuery = `
-            CREATE TABLE IF NOT EXISTS notes (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_note TEXT NOT NULL,
-                ai_note TEXT,
-                ai_type ENUM('gpt', 'claude') DEFAULT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        `;
+// notes 테이블 생성 함수 
+// const createNotesTable = (connection) => {
+//     return new Promise((resolve, reject) => {
+//         const createTableQuery = `
+//             CREATE TABLE IF NOT EXISTS notes (
+//                 id INT AUTO_INCREMENT PRIMARY KEY,
+//                 user_note TEXT NOT NULL,
+//                 ai_note TEXT,
+//                 ai_type ENUM('gpt', 'claude') DEFAULT NULL,
+//                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+//                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+//             )
+//         `;
         
-        connection.query(createTableQuery, (err, result) => {
-            if (err) {
-                console.error('테이블 생성 중 오류:', err);
-                reject(err);
-                return;
-            }
-            console.log('Notes 테이블 준비 완료');
-            resolve(result);
-        });
-    });
-};
+//         connection.query(createTableQuery, (err, result) => {
+//             if (err) {
+//                 console.error('테이블 생성 중 오류:', err);
+//                 reject(err);
+//                 return;
+//             }
+//             console.log('Notes 테이블 준비 완료');
+//             resolve(result);
+//         });
+//     });
+// };
 
 // DB 연결 상태 체크 미들웨어
 const checkDbConnection = (req, res, next) => {
