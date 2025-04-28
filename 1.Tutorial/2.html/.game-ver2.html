@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>박스 피하기 게임</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+    }
+    #container {
+      display: flex;
+      gap: 40px;
+      margin-top: 30px;
+    }
+    #game {
+      position: relative;
+      width: 400px;
+      height: 600px;
+      border: 2px solid white;
+      background: #222;
+      overflow: hidden;
+    }
+    #player {
+      position: absolute;
+      bottom: 10px;
+      width: 30px;
+      height: 30px;
+      background: #4caf50;
+      left: 0;
+    }
+    .box {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      top: 0;
+    }
+    .red { background: #f44336; }
+    .yellow { background: gold; }
+    .blue { background: #2196f3; }
+
+    #info {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 15px;
+    }
+
+    #legend {
+      color: white;
+      font-size: 16px;
+    }
+    #legend h3 {
+      margin-bottom: 10px;
+    }
+    .legend-box {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+    }
+    .red-box { background: #f44336; }
+    .yellow-box { background: gold; }
+    .blue-box { background: #2196f3; }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div>
+      <div id="game">
+        <div id="player"></div>
+      </div>
+      <div id="info">
+        ⏱️ 시간: <span id="time">0</span>초 | 🧮 점수: <span id="score">0</span>
+      </div>
+    </div>
+    <div id="legend">
+      <h3>📦 박스 종류</h3>
+      <div class="legend-box"><div class="legend-color red-box"></div>충돌 시 게임 오버</div>
+      <div class="legend-box"><div class="legend-color yellow-box"></div>충돌 시 점수 -30</div>
+      <div class="legend-box"><div class="legend-color blue-box"></div>충돌 시 점수 +50</div>
+    </div>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+    const player = document.getElementById("player");
+    const timeEl = document.getElementById("time");
+    const scoreEl = document.getElementById("score");
+
+    let boxSpeed = 2;
+    let boxCount = 1;
+    let time = 0;
+    let score = 0;
+    let gameOver = false;
+
+    let moveLeft = false;
+    let moveRight = false;
+
+    let playerX = (game.clientWidth - player.offsetWidth) / 2;
+    player.style.left = playerX + "px";
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") moveLeft = true;
+      if (e.key === "ArrowRight") moveRight = true;
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowLeft") moveLeft = false;
+      if (e.key === "ArrowRight") moveRight = false;
+    });
+
+    function movePlayer() {
+      if (moveLeft) playerX -= 5;
+      if (moveRight) playerX += 5;
+
+      const maxX = game.clientWidth - player.offsetWidth;
+      playerX = Math.max(0, Math.min(maxX, playerX));
+      player.style.left = playerX + "px";
+    }
+
+    setInterval(() => {
+      if (!gameOver) movePlayer();
+    }, 16);
+
+    function createBox() {
+      const box = document.createElement("div");
+
+      // 랜덤 타입 선택: red, yellow, blue
+      const types = ["red", "yellow", "blue"];
+      const type = types[Math.floor(Math.random() * types.length)];
+      box.classList.add("box", type);
+      box.dataset.type = type;
+
+      box.style.left = Math.floor(Math.random() * (game.clientWidth - 40)) + "px";
+      game.appendChild(box);
+
+      let boxY = 0;
+      const fall = setInterval(() => {
+        if (gameOver) {
+          clearInterval(fall);
+          box.remove();
+          return;
+        }
+
+        boxY += boxSpeed;
+        box.style.top = boxY + "px";
+
+        const boxRect = box.getBoundingClientRect();
+        const playerRect = player.getBoundingClientRect();
+
+        if (
+          boxRect.bottom >= playerRect.top &&
+          boxRect.top <= playerRect.bottom &&
+          boxRect.left < playerRect.right &&
+          boxRect.right > playerRect.left
+        ) {
+          const type = box.dataset.type;
+          if (type === "red") {
+            alert("💥 게임 오버! 점수: " + score);
+            gameOver = true;
+            location.reload();
+          } else if (type === "yellow") {
+            score = Math.max(0, score - 30);
+          } else if (type === "blue") {
+            score += 50;
+          }
+          scoreEl.textContent = score;
+          box.remove();
+          clearInterval(fall);
+        }
+
+        if (boxY > 600) {
+          box.remove();
+          clearInterval(fall);
+        }
+      }, 20);
+    }
+
+    setInterval(() => {
+      if (gameOver) return;
+      time++;
+      score += 10;
+      timeEl.textContent = time;
+      scoreEl.textContent = score;
+
+      if (time % 5 === 0) {
+        boxSpeed += 1;
+        boxCount += 1;
+      }
+    }, 1000);
+
+    setInterval(() => {
+      if (!gameOver) {
+        for (let i = 0; i < boxCount; i++) {
+          setTimeout(createBox, i * 100);
+        }
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
