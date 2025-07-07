@@ -76,9 +76,11 @@ const createNotesTable = (connection) => {
     const createTableQuery = `
             CREATE TABLE IF NOT EXISTS notes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                user_note TEXT,
+                user_note TEXT NOT NULL,
                 ai_note TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                ai_type ENUM('gpt', 'claude') DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `;
 
@@ -88,6 +90,7 @@ const createNotesTable = (connection) => {
         reject(err);
         return;
       }
+      console.log("Notes 테이블 준비 완료");
       resolve(result);
     });
   });
